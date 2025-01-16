@@ -1,40 +1,86 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# Abebe: A Flutter Package for Typing Speed Based Animation Control
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+Abebe is a Flutter package that adjusts the speed of an animation based on the user's typing speed. It uses the `Lottie` animation and modifies the animation's playback speed in real-time as characters are typed into a text field.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- Controls the speed of Lottie animations based on typing speed.
+- Customizable animation speed multiplier.
+- Supports dynamic and real-time animation updates.
+
+## Installation
+
+To use the `Abebe` package in your Flutter project, add the following dependency to your `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  abebe: ^1.0.0
 
 ## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Then, run the following command to install the package:
+
+flutter pub get
+
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+Here’s a simple example of how to use the Abebe package:
 
-```dart
-const like = 'sample';
+Import the package:
+
+import 'package:abebe/abebe.dart';
+
+Create a TextEditingController:
+
+TextEditingController _controller = TextEditingController();
+
+Use the Abebe widget:
+
+Abebe(
+  assetPath: 'assets/your_lottie_animation.json', // Path to your Lottie asset
+  textController: _controller,
+  speedMultiplier: 2, // Optional multiplier to adjust speed
+)
+
+Wrap it with a UI component:
+
+    Scaffold(
+      body: Column(
+        children: [
+          TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              labelText: 'Start typing...',
+            ),
+          ),
+          Expanded(
+            child: Abebe(
+              assetPath: 'assets/animation.json',
+              textController: _controller,
+              speedMultiplier: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+
+Parameters
+
+    assetPath (required): The path to the Lottie asset you want to display.
+    textController (required): The TextEditingController linked to the text field.
+    speedMultiplier (optional): A multiplier to adjust the speed of the animation. Default is 1.
+
+License
+
+This package is open source and available under the MIT License. See the LICENSE file for more information.
+Contributing
+
+Feel free to fork the repository, make improvements, and submit pull requests. All contributions are welcome!
+Support
+
+For any issues or questions, feel free to open an issue in the GitHub repository or contact the maintainers.
+
+
+You can save this entire content as a `README.md` file in your project repository.
 ```
-
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
-# Abebe
