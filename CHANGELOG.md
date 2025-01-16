@@ -1,3 +1,4 @@
-## 0.0.1
+## 1.0.0
 
-* TODO: Describe initial release.
+- Initial release with core functionality.
+- Supports JSON assets and Lottie animations.
