@@ -1,4 +1,4 @@
-name: Abebe
+name: abebe
 description: A Flutter package to dynamically adjust animation frame rates based on typing speed. Initial release supports Lottie assets, with future support for additional asset types.
 version: 1.0.0
 homepage: https://github.com/sudouserx/Abebe
