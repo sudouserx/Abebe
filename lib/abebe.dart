@@ -1,78 +1,103 @@
 // lib/abebe.dart
 
-import 'package:flutter/material.dart';
-// ignore: depend_on_referenced_packages
+import 'package:flutter/widgets.dart';
 import 'package:lottie/lottie.dart';
+import 'dart:math';
 
 class Abebe extends StatefulWidget {
   final String assetPath;
   final TextEditingController textController;
-  final int speedMultiplier;
+  final AnimationController animationController;
+  final double sensitivity;
 
   const Abebe({
-    super.key,
+    Key? key,
     required this.assetPath,
     required this.textController,
-    this.speedMultiplier = 1,
-  });
+    required this.animationController,
+    this.sensitivity = 0.2,
+  }) : super(key: key);
 
   @override
-  State<Abebe> createState() => _AbebeState();
+  _AbebeState createState() => _AbebeState();
 }
 
-class _AbebeState extends State<Abebe> with SingleTickerProviderStateMixin {
-  late final AnimationController _animationController;
-  late Duration _defaultDuration;
-  late DateTime _startTime;
-  int _typedCharacters = 0;
-  double _typingSpeed = 0.0;
+class _AbebeState extends State<Abebe> {
+  late int _lastTextLength;
+  DateTime? _lastTypingTime;
+  Duration? _baseDuration;
+  double _currentSpeed = 1.0;
 
   @override
   void initState() {
     super.initState();
-
-    // Initialize Animation Controller
-    _animationController = AnimationController(vsync: this);
-
-    // Set default values and add listener to text controller
-    widget.textController.addListener(_calculateTypingSpeed);
-    _startTime = DateTime.now();
+    _lastTextLength = widget.textController.text.length;
+    widget.textController.addListener(_handleTextInput);
+    widget.animationController.addListener(_updateAnimation);
   }
 
   @override
   void dispose() {
-    widget.textController.removeListener(_calculateTypingSpeed);
-    _animationController.dispose();
+    widget.textController.removeListener(_handleTextInput);
+    widget.animationController.removeListener(_updateAnimation);
     super.dispose();
   }
 
-  void _calculateTypingSpeed() {
-    final currentTime = DateTime.now();
-    final timeElapsed =
-        currentTime.difference(_startTime).inMilliseconds / 1000.0;
+  void _handleTextInput() {
+    final now = DateTime.now();
+    final textLength = widget.textController.text.length;
+    
+    if (_lastTypingTime != null) {
+      final timeDelta = now.difference(_lastTypingTime!).inMilliseconds;
+      if (timeDelta > 0) {
+        final charDelta = (textLength - _lastTextLength).abs();
+        final typingSpeed = charDelta / timeDelta * 1000;
+        
+        // Calculate new speed based on typing velocity
+        _currentSpeed = max(1.0, 1.0 + typingSpeed * widget.sensitivity);
+        
+        // Immediately apply speed change
+        _updateAnimationDuration();
+      }
+    }
 
-    if (timeElapsed > 0) {
-      _typedCharacters = widget.textController.text.length;
-      _typingSpeed = _typedCharacters / timeElapsed; // Characters per second
+    _lastTextLength = textLength;
+    _lastTypingTime = now;
+  }
 
-      _adjustAnimationSpeed();
+  void _updateAnimation() {
+    // Smoothly return to normal speed when inactive
+    if (DateTime.now().difference(_lastTypingTime ?? DateTime.now()) > Duration(seconds: 1)) {
+      _currentSpeed = max(1.0, _currentSpeed * 0.95);
+      _updateAnimationDuration();
     }
   }
 
-  void _adjustAnimationSpeed() {
-    final speedMultiplier = widget.speedMultiplier;
-    final newSpeed = 1.0 + (_typingSpeed * 0.1 * speedMultiplier);
+  void _updateAnimationDuration() {
+    if (_baseDuration == null) return;
+
+    final newDuration = _baseDuration! ~/ _currentSpeed.toInt();
+    final progress = widget.animationController.value;
+
+    if (widget.animationController.duration != newDuration) {
+      widget.animationController
+        ..stop()
+        ..duration = newDuration
+        ..value = progress.clamp(0.0, 1.0)
+        ..repeat();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Lottie.asset(
       widget.assetPath,
-      controller: _animationController,
+      controller: widget.animationController,
       onLoaded: (composition) {
-        _defaultDuration = composition.duration;
-        _animationController.duration = _defaultDuration;
-        _animationController.repeat();
+        _baseDuration = composition.duration;
+        widget.animationController
+          ..duration = _baseDuration
+          ..repeat();
       },
     );
   }

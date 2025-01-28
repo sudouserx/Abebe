@@ -6,7 +6,9 @@
 [![License](https://img.shields.io/github/license/sudouserx/Abebe)](LICENSE)
 [![Version](https://img.shields.io/pub/v/abebe)](https://pub.dev/packages/abebe)
 
-Abebe is a Flutter package that adjusts the speed of an animation based on the user's typing speed. It uses the `Lottie` animation and modifies the animation's playback speed in real-time as characters are typed.
+Abebe is a Flutter package that dynamically adjusts the speed of a Lottie animation based on the user's typing speed. It provides real-time synchronization between typing activity and animation playback, creating a responsive and engaging user experience.
+
+---
 
 ## Table of Contents
 - [Features](#features)
@@ -14,26 +16,33 @@ Abebe is a Flutter package that adjusts the speed of an animation based on the u
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Parameters](#parameters)
+- [Example](#example)
+- [Testing](#testing)
 - [License](#license)
 - [Contributing](#contributing)
 - [Support](#support)
 
+---
+
 ## Features
 
-- Controls the speed of Lottie animations based on typing speed.
-- Customizable animation speed multiplier.
-- Supports dynamic and real-time animation updates.
+- **Real-time Animation Control**: Adjusts animation speed based on typing speed.
+- **Smooth Transitions**: Uses exponential decay for smooth speed changes.
+- **Customizable Sensitivity**: Control how much the animation responds to typing speed.
+- **Progress Preservation**: Maintains animation progress during speed changes.
+- **Inactivity Reset**: Automatically resets to normal speed after 1 second of inactivity.
+- **Comprehensive Testing**: Includes unit and widget tests for reliability.
+
+---
 
 ## Installation
 
-To use the `Abebe` package in your Flutter project, add the following dependency to your `pubspec.yaml` file:
+Add the `Abebe` package to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  abebe: ^1.0.0
+  abebe: ^1.1.0
 ```
-
-## Getting Started
 
 Then, run the following command to install the package:
 
@@ -41,9 +50,9 @@ Then, run the following command to install the package:
 flutter pub get
 ```
 
-## Usage
+---
 
-Here’s a simple example of how to use the Abebe package:
+## Getting Started
 
 1. Import the package:
 
@@ -51,60 +60,150 @@ Here’s a simple example of how to use the Abebe package:
     import 'package:abebe/abebe.dart';
     ```
 
-2. Create a `TextEditingController`:
+2. Add the `Lottie` package to your `pubspec.yaml` file (if not already added):
 
-    ```dart
-    TextEditingController _controller = TextEditingController();
+    ```yaml
+    dependencies:
+      lottie: ^2.0.0
     ```
 
-3. Use the Abebe widget:
+3. Place your Lottie JSON file in the `assets` folder and update `pubspec.yaml`:
 
-    ```dart
-    Abebe(
-      assetPath: 'assets/your_lottie_animation.json', // Path to your Lottie asset
-      textController: _controller,
-      speedMultiplier: 2, // Optional multiplier to adjust speed
-    )
+    ```yaml
+    flutter:
+      assets:
+        - assets/sample.json
     ```
 
-4. Wrap it with a UI component:
+---
 
-    ```dart
-    Scaffold(
+## Usage
+
+Here’s a simple example of how to use the `Abebe` package:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:abebe/abebe.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Abebe Example',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+  final TextEditingController _controller = TextEditingController();
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Abebe Example'),
+      ),
       body: Column(
         children: [
-          TextField(
-            controller: _controller,
-            decoration: InputDecoration(
-              labelText: 'Start typing...',
-            ),
+          Abebe(
+            assetPath: 'assets/sample.json',
+            textController: _controller,
+            animationController: _animationController,
+            sensitivity: 0.3, // Adjust sensitivity here
           ),
-          Expanded(
-            child: Abebe(
-              assetPath: 'assets/animation.json',
-              textController: _controller,
-              speedMultiplier: 1,
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: TextField(
+              controller: _controller,
+              decoration: const InputDecoration(
+                hintText: 'Type here to control the animation...',
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
             ),
           ),
         ],
       ),
     );
-    ```
+  }
+}
+```
+
+---
 
 ## Parameters
 
-- `assetPath` (required): The path to the Lottie asset you want to display.
-- `textController` (required): The `TextEditingController` linked to the text field.
-- `speedMultiplier` (optional): A multiplier to adjust the speed of the animation. Default is 1.
+| Parameter               | Description                                                                 |
+|-------------------------|-----------------------------------------------------------------------------|
+| `assetPath` (required)  | Path to the Lottie JSON file.                                               |
+| `textController` (required) | `TextEditingController` linked to the text field.                       |
+| `animationController` (required) | `AnimationController` to control the animation.                     |
+| `sensitivity` (optional) | Controls how much the animation responds to typing speed. Default is `0.2`. |
+
+---
+
+## Example
+
+For a complete example, check out the [example folder](example/) in the repository.
+
+---
+
+## Testing
+
+The package includes comprehensive unit and widget tests. To run the tests:
+
+```bash
+flutter test test/abebe_test.dart
+```
+
+---
 
 ## License
 
 This package is open source and available under the MIT License. See the [LICENSE](LICENSE) file for more information.
 
+---
+
 ## Contributing
 
-Feel free to fork the repository, make improvements, and submit pull requests. All contributions are welcome!
+Contributions are welcome! Feel free to fork the repository, make improvements, and submit pull requests. Please ensure your code follows the project's coding standards and includes appropriate tests.
+
+---
 
 ## Support
 
-For any issues or questions, feel free to open an issue in the GitHub repository or contact the maintainers.
+For any issues or questions, feel free to open an issue in the [GitHub repository](https://github.com/sudouserx/Abebe/issues) or contact the maintainers.
